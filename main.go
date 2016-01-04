@@ -2,51 +2,13 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/a8m/tree"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
+	fmt "github.com/k0kubun/pp"
 	"os"
 	"strings"
-	"syscall"
-	"time"
 )
-
-type file struct {
-	*s3.Object
-	path  string
-	size  int64
-	isDir bool
-	files []*file
-}
-
-func (f *file) Name() string          { return f.path }
-func (f *file) Size() int64           { return f.size }
-func (f *file) Mode() (o os.FileMode) { return }
-func (f *file) ModTime() time.Time    { return *f.LastModified }
-func (f *file) IsDir() bool           { return f.isDir }
-func (f *file) Sys() interface{} {
-	var s *syscall.Stat_t
-	return s
-}
-
-var storage = map[string]*file{}
-
-type fs struct{}
-
-func (f *fs) Stat(path string) (os.FileInfo, error) {
-	return storage[path], nil
-}
-
-func (f *fs) ReadDir(path string) ([]string, error) {
-	keys := []string{}
-	for key, val := range storage {
-		if key == (path + "/" + val.path) {
-			keys = append(keys, val.path)
-		}
-	}
-	return keys, nil
-}
 
 var (
 	a      = flag.Bool("a", false, "")
@@ -73,6 +35,7 @@ func main() {
 		Bucket: &b,
 		Prefix: &pre,
 	})
+	fs := &Fs{make(map[string]*file)}
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -81,31 +44,13 @@ func main() {
 				if strings.HasPrefix(*resp.Contents[i].Key, "code/kinesis-scaling-utils") {
 					continue
 				}
-				paths := strings.Split(*resp.Contents[i].Key, "/")
-				for j, path := range paths {
-					if path == "" {
-						continue
-					}
-					if j == len(paths)-1 {
-						fmt.Println(resp.Contents[i])
-						storage[*resp.Contents[i].Key] = &file{
-							Object: resp.Contents[i],
-							size:   *resp.Contents[i].Size,
-							path:   path}
-					} else {
-						storage[strings.Join(paths[:j+1], "/")] = &file{
-							path:  path,
-							isDir: true,
-						}
-					}
-				}
+				fs.addFile(resp.Contents[i])
 			}
 		}
-		//		fmt.Println(storage)
 	}
 	var nd, nf int
 	inf := tree.New("code")
-	opts := &tree.Options{Fs: new(fs), UnitSize: *u, LastMod: *D, OutFile: os.Stdout}
+	opts := &tree.Options{Fs: fs, UnitSize: *u, LastMod: *D, OutFile: os.Stdout, Colorize: true}
 	if d, f := inf.Visit(opts); f != 0 {
 		nd, nf = nd+d-1, nf+f
 	}
