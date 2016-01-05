@@ -39,22 +39,21 @@ func (f *file) Sys() interface{} {
 	return s
 }
 
-// code/dev/config.json
-// code/dev/worker/file-a.gz
-// code/dev/worker/file-b.gz
-
-// code, dev, config.json
-// code
-// code/dev
-// code/dev/config.json
+// Fs implement the tree.Fs interface
 type Fs struct {
 	files map[string]*file
 }
 
+// NewFs return new Fs instance.
+func NewFs() *Fs { return &Fs{make(map[string]*file)} }
+
+// Stat return "file" by the given path.
+// "file" implemented the os.FileInfo
 func (f *Fs) Stat(path string) (os.FileInfo, error) {
 	return f.files[path], nil
 }
 
+// ReadDir return the list of files in the given dir-path.
 func (f *Fs) ReadDir(path string) ([]string, error) {
 	keys := []string{}
 	dir, ok := f.files[path]
@@ -66,6 +65,9 @@ func (f *Fs) ReadDir(path string) ([]string, error) {
 	return keys, nil
 }
 
+// get s3.Object, split its path(Key) to dirs,
+// and for each of them create a "file" and add
+// it to Fs if not exists.
 func (fs *Fs) addFile(o *s3.Object) {
 	path := strings.Trim(*o.Key, "/")
 	dirs := strings.Split(path, "/")
@@ -76,13 +78,11 @@ func (fs *Fs) addFile(o *s3.Object) {
 		if parentPath != "" {
 			filePath = parentPath + "/" + filePath
 		}
-		// it's a file
 		if i > 0 && i == len(dirs)-1 {
-			f = &file{ /*o*/ nil, d, filePath, nil}
+			f = &file{o, d, filePath, nil}
 		} else {
 			f = &file{nil, d, filePath, make([]*file, 0)}
 		}
-		// add to parent
 		if _, ok := fs.files[filePath]; !ok {
 			fs.files[filePath] = f
 			if dir, ok := fs.files[parentPath]; ok && i > 0 {
