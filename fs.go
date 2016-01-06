@@ -50,7 +50,11 @@ func NewFs() *Fs { return &Fs{make(map[string]*file)} }
 // Stat return "file" by the given path.
 // "file" implemented the os.FileInfo
 func (f *Fs) Stat(path string) (os.FileInfo, error) {
-	return f.files[path], nil
+	if file, ok := f.files[path]; ok {
+		return file, nil
+	}
+	return nil, os.ErrNotExist
+
 }
 
 // ReadDir return the list of files in the given dir-path.
@@ -68,8 +72,8 @@ func (f *Fs) ReadDir(path string) ([]string, error) {
 // get s3.Object, split its path(Key) to dirs,
 // and for each of them create a "file" and add
 // it to Fs if not exists.
-func (fs *Fs) addFile(o *s3.Object) {
-	path := strings.Trim(*o.Key, "/")
+func (fs *Fs) addFile(path string, o *s3.Object) {
+	path = strings.Trim(path, "/")
 	dirs := strings.Split(path, "/")
 	for i, d := range dirs {
 		var f *file
@@ -90,4 +94,8 @@ func (fs *Fs) addFile(o *s3.Object) {
 			}
 		}
 	}
+}
+
+func (fs *Fs) isEmpty() bool {
+	return len(fs.files) == 0
 }
