@@ -11,17 +11,16 @@ import (
 )
 
 var (
-	a = flag.Bool("a", false, "")
-	d = flag.Bool("d", false, "")
-	f = flag.Bool("f", false, "")
-	s = flag.Bool("s", false, "")
-	h = flag.Bool("h", false, "")
-	u = flag.Bool("u", false, "")
-	g = flag.Bool("g", false, "")
-	Q = flag.Bool("Q", false, "")
-	D = flag.Bool("D", false, "")
-	L = flag.Int("L", 0, "")
-
+	o = flag.String("o", "", "")  // Output to file
+	a = flag.Bool("a", false, "") // All files
+	d = flag.Bool("d", false, "") // Dirs only
+	f = flag.Bool("f", false, "") // Full path
+	s = flag.Bool("s", false, "") // Show byte size
+	h = flag.Bool("h", false, "") // Show SI size
+	Q = flag.Bool("Q", false, "") // Quote filename
+	D = flag.Bool("D", false, "") // Show last mod
+	C = flag.Bool("C", false, "") // Colorize
+	L = flag.Int("L", 0, "")      // Deep level
 	// S3 args
 	bucket = flag.String("b", "l2r", "")
 	prefix = flag.String("p", "code", "")
@@ -60,16 +59,22 @@ func main() {
 	if noPrefix {
 		rootDir = *bucket
 	}
-	/*	if fs.isEmpty() {
-		err := errors.New("no objects found in path: " + rootDir)
-		errAndExit(err)
-	}*/
+	// Output file
+	var outFile = os.Stdout
+	if *o != "" {
+		outFile, err = os.Create(*o)
+		if err != nil {
+			errAndExit(err)
+		}
+	}
+	defer outFile.Close()
 	opts := &tree.Options{
 		Fs:        fs,
-		UnitSize:  *u,
+		UnitSize:  *h,
 		LastMod:   *D,
-		OutFile:   os.Stdout,
+		OutFile:   outFile,
 		DeepLevel: *L,
+		Colorize:  *C,
 	}
 	inf := tree.New(rootDir)
 	if d, f := inf.Visit(opts); f != 0 {
@@ -81,7 +86,7 @@ func main() {
 	if !opts.DirsOnly {
 		footer += fmt.Sprintf(", %d files", nf)
 	}
-	fmt.Println(footer)
+	fmt.Fprintf(outFile, footer)
 }
 
 func usageAndExit(msg string) {
