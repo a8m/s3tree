@@ -70,11 +70,16 @@ func main() {
 	defer outFile.Close()
 	opts := &tree.Options{
 		Fs:        fs,
-		UnitSize:  *h,
-		LastMod:   *D,
 		OutFile:   outFile,
-		DeepLevel: *L,
+		All:       *a,
+		DirsOnly:  *d,
+		FullPath:  *f,
+		ByteSize:  *s,
+		UnitSize:  *h,
+		Quotes:    *Q,
+		LastMod:   *D,
 		Colorize:  *C,
+		DeepLevel: *L,
 	}
 	inf := tree.New(rootDir)
 	if d, f := inf.Visit(opts); f != 0 {
