@@ -11,19 +11,26 @@ import (
 )
 
 var (
-	o = flag.String("o", "", "")  // Output to file
-	a = flag.Bool("a", false, "") // All files
-	d = flag.Bool("d", false, "") // Dirs only
-	f = flag.Bool("f", false, "") // Full path
-	s = flag.Bool("s", false, "") // Show byte size
-	h = flag.Bool("h", false, "") // Show SI size
-	Q = flag.Bool("Q", false, "") // Quote filename
-	D = flag.Bool("D", false, "") // Show last mod
-	C = flag.Bool("C", false, "") // Colorize
-	L = flag.Int("L", 0, "")      // Deep level
+	o         = flag.String("o", "", "")          // Output to file
+	a         = flag.Bool("a", false, "")         // All files
+	d         = flag.Bool("d", false, "")         // Dirs only
+	f         = flag.Bool("f", false, "")         // Full path
+	s         = flag.Bool("s", false, "")         // Show byte size
+	h         = flag.Bool("h", false, "")         // Show SI size
+	Q         = flag.Bool("Q", false, "")         // Quote filename
+	D         = flag.Bool("D", false, "")         // Show last mod
+	C         = flag.Bool("C", false, "")         // Colorize
+	L         = flag.Int("L", 0, "")              // Deep level
+	U         = flag.Bool("U", false, "")         // No sort
+	v         = flag.Bool("v", false, "")         // Version sort
+	t         = flag.Bool("t", false, "")         // Last modification sort
+	c         = flag.Bool("c", false, "")         // Last status sort
+	r         = flag.Bool("r", false, "")         // Reverse sort
+	dirsfirst = flag.Bool("dirsfirst", false, "") // Dirs first sort
+	sort      = flag.String("sort", "", "")       // Sort by name or size
 	// S3 args
-	bucket = flag.String("b", "l2r", "")
-	prefix = flag.String("p", "code", "")
+	bucket = flag.String("b", "", "")
+	prefix = flag.String("p", "", "")
 	region = flag.String("region", "us-east-1", "")
 )
 
@@ -80,6 +87,14 @@ func main() {
 		LastMod:   *D,
 		Colorize:  *C,
 		DeepLevel: *L,
+		NoSort:    *U,
+		ReverSort: *r,
+		DirSort:   *dirsfirst,
+		VerSort:   *v,
+		ModSort:   *t,
+		CTimeSort: *c,
+		NameSort:  *sort == "name",
+		SizeSort:  *sort == "size",
 	}
 	inf := tree.New(rootDir)
 	if d, f := inf.Visit(opts); f != 0 {
