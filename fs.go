@@ -61,11 +61,9 @@ func (f *file) IsDir() bool {
 	return f.files != nil && len(f.files) > 0
 }
 
-// Fill and return syscall.Stat_t
+// Sys return dummy-stat_t
 func (f *file) Sys() interface{} {
 	var s *syscall.Stat_t
-	s.Mode = f.ModTime()
-	s.Size = f.Size()
 	return s
 }
 
