@@ -22,20 +22,50 @@ type file struct {
 	files []*file
 }
 
-func (f *file) Name() string { return f.name }
-func (f *file) Size() int64 {
-	if f.Object != nil {
-		return *f.Object.Size
-	}
-	return 0
+// Name return the s3-file name.
+func (f *file) Name() string {
+	return f.name
 }
-func (f *file) Mode() (o os.FileMode) { return }
-func (f *file) ModTime() time.Time    { return *f.LastModified }
+
+// Size return the size of the s3-file,
+// if it's dir, it will return the sum of its childs
+func (f *file) Size() (size int64) {
+	if f.Object != nil {
+		size = *f.Object.Size
+	} else {
+		for _, ff := range f.files {
+			size += ff.Size()
+		}
+	}
+	return
+}
+
+// Mode return os.ModeDir if it's dir
+func (f *file) Mode() (o os.FileMode) {
+	if f.IsDir() {
+		o = os.ModeDir
+	}
+	return
+}
+
+// ModTime return the last modification
+func (f *file) ModTime() (t time.Time) {
+	if f.Object != nil {
+		t = *f.LastModified
+	}
+	return
+}
+
+// Test if the given file is a directory
 func (f *file) IsDir() bool {
 	return f.files != nil && len(f.files) > 0
 }
+
+// Fill and return syscall.Stat_t
 func (f *file) Sys() interface{} {
 	var s *syscall.Stat_t
+	s.Mode = f.ModTime()
+	s.Size = f.Size()
 	return s
 }
 
@@ -94,8 +124,4 @@ func (fs *Fs) addFile(path string, o *s3.Object) {
 			}
 		}
 	}
-}
-
-func (fs *Fs) isEmpty() bool {
-	return len(fs.files) == 0
 }
