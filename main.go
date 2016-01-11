@@ -24,7 +24,6 @@ var (
 	U         = flag.Bool("U", false, "")         // No sort
 	v         = flag.Bool("v", false, "")         // Version sort
 	t         = flag.Bool("t", false, "")         // Last modification sort
-	c         = flag.Bool("c", false, "")         // Last status sort
 	r         = flag.Bool("r", false, "")         // Reverse sort
 	dirsfirst = flag.Bool("dirsfirst", false, "") // Dirs first sort
 	sort      = flag.String("sort", "", "")       // Sort by name or size
@@ -92,7 +91,6 @@ func main() {
 		DirSort:   *dirsfirst,
 		VerSort:   *v,
 		ModSort:   *t,
-		CTimeSort: *c,
 		NameSort:  *sort == "name",
 		SizeSort:  *sort == "size",
 	}
