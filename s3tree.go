@@ -36,7 +36,7 @@ var (
 	region = flag.String("region", "us-east-1", "")
 )
 
-var usage = `Usage: s3tree [options...] [paths...]
+var usage = `Usage: s3tree -b bucket-name -p prefix(optional) [options...]
 
 Options:
     --------- S3 options ----------

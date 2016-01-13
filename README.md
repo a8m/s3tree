@@ -9,7 +9,7 @@ $ go get github.com/a8m/s3tree
 
 ### How to use ?
 ```sh
-$ s3tree -b bucket -p prefix(optional) ...
+$ s3tree -b bucket-name -p prefix(optional) [options...]
 ```
 
 ### License
