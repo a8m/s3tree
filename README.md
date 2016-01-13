@@ -1,6 +1,6 @@
 s3tree
 ---
-> Amazon s3 tree command
+> s3tree is a tree command for [Amazon S3](https://aws.amazon.com/s3/).
 
 ### Installation:
 ```sh
