@@ -11,6 +11,8 @@ $ go get github.com/a8m/s3tree
 ```sh
 $ s3tree -b bucket-name -p prefix(optional) [options...]
 ```
+Remember, your credentials should located at `~/.aws/credentials` or as an environment variables: 
+`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
 
 ### License
 MIT

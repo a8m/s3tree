@@ -8,13 +8,6 @@ import (
 	"time"
 )
 
-// S3-Object example
-// { ETag: "\"3...-15\"",
-// Key: "code/..../ironBeastFile.tar.gz",
-// LastModified: 2014-06-25 14:32:12 +0000 UTC,
-// Owner: { DisplayName: "...", ID: "07e122e2b7.... 0b6a31" },
-// Size: 227849710,
-// StorageClass: "GLACIER" }
 type file struct {
 	*s3.Object
 	name  string
