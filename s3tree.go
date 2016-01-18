@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/a8m/tree"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"os"
 )
@@ -77,7 +78,7 @@ func main() {
 		err := errors.New("-b(s3 bucket) is required.")
 		errAndExit(err)
 	}
-	svc := s3.New(&aws.Config{Region: region})
+	svc := s3.New(session.New(&aws.Config{Region: region}))
 	spin := NewSpin()
 	resp, err := svc.ListObjects(&s3.ListObjectsInput{
 		Bucket: bucket,
