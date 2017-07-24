@@ -1,11 +1,12 @@
 package main
 
 import (
-	"github.com/aws/aws-sdk-go/service/s3"
 	"os"
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/aws/aws-sdk-go/service/s3"
 )
 
 type file struct {
@@ -56,8 +57,7 @@ func (f *file) IsDir() bool {
 
 // Sys return dummy-stat_t
 func (f *file) Sys() interface{} {
-	var s *syscall.Stat_t
-	return s
+	return new(syscall.Stat_t)
 }
 
 // Fs implement the tree.Fs interface
