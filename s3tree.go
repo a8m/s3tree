@@ -4,11 +4,13 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"os"
+	"strings"
+
 	"github.com/a8m/tree"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"os"
 )
 
 var (
@@ -34,7 +36,7 @@ var (
 	// S3 args
 	bucket = flag.String("b", "", "")
 	prefix = flag.String("p", "", "")
-	region = flag.String("region", "us-east-1", "")
+	region = flag.String("region", getenv("AWS_DEFAULT_REGION", "us-east-1"), "")
 )
 
 var usage = `Usage: s3tree -b bucket-name -p prefix(optional) [options...]
@@ -43,7 +45,7 @@ Options:
     --------- S3 options ----------
     -b		    s3 bucket(required).
     -p		    s3 prefix.
-    --region name   aws region(default to us-east-1).
+    --region name   aws region(default to env variable AWS_DEFAULT_REGION or us-east-1).
     ------- Listing options -------
     -a		    All files are listed.
     -d		    List directories only.
@@ -68,16 +70,28 @@ Options:
     ------- Graphics options ------
     -i		    Don't print indentation lines.
     -C		    Turn colorization on always.
+	[s3 url]		s3 url to list objects.
 `
 
 func main() {
 	flag.Usage = func() { fmt.Fprint(os.Stderr, usage) }
 	flag.Parse()
-	var noPrefix = len(*prefix) == 0
-	if len(*bucket) == 0 {
-		err := errors.New("-b(s3 bucket) is required.")
-		errAndExit(err)
+	if flag.NArg() != 0 {
+		bucket0, prefix0 := s3urlToBucketAndPrefix(flag.Arg(0))
+		if len(*bucket) != 0 || len(*prefix) != 0 {
+			err := errors.New("s3 bucket and prefix are already set by path.")
+			errAndExit(err)
+		}
+		bucket = &bucket0
+		prefix = &prefix0
+	} else {
+		if len(*bucket) == 0 {
+			err := errors.New("-b(s3 bucket) is required.")
+			errAndExit(err)
+		}
 	}
+	var noPrefix = len(*prefix) == 0
+
 	svc := s3.New(session.New(&aws.Config{Region: region}))
 	spin := NewSpin()
 	resp, err := svc.ListObjects(&s3.ListObjectsInput{
@@ -160,4 +174,33 @@ func usageAndExit(msg string) {
 func errAndExit(err error) {
 	fmt.Fprintf(os.Stderr, "s3tree: \"%s\"\n", err)
 	os.Exit(1)
+}
+
+// split an aws s3 url into bucket and prefix. The code is used when parsing the s3 url from the command line.
+// Usage:
+//
+//	s3url := "s3://mybucket/myfolder"
+//	bucket, prefix := s3urlToBucketAndPrefix(s3url)
+//	fmt.Println(bucket, prefix)
+//
+// Output:
+//
+//	mybucket myfolder
+func s3urlToBucketAndPrefix(s3url string) (bucket, prefix string) {
+	// Remove s3://
+	s3url = strings.TrimPrefix(s3url, "s3://")
+	// Split into bucket and prefix
+	parts := strings.SplitN(s3url, "/", 2)
+	if len(parts) == 1 {
+		return parts[0], ""
+	}
+	return parts[0], parts[1]
+}
+
+func getenv(key, fallback string) string {
+	value := os.Getenv(key)
+	if len(value) == 0 {
+		return fallback
+	}
+	return value
 }

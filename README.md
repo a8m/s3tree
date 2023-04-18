@@ -4,11 +4,11 @@ s3tree
 
 ### Installation:
 ```sh
-$ go install github.com/a8m/s3tree@latest
+$ go install github.com/kk17/s3tree@latest
 ```
 for golang version less than 1.8:
 ```sh
-$ go get github.com/a8m/s3tree
+$ go get github.com/kk17/s3tree
 ```
 
 ### How to use ?
@@ -16,7 +16,15 @@ $ go get github.com/a8m/s3tree
 $ s3tree -b bucket-name -p prefix(optional) [options...]
 ```
 Remember, your credentials should located at `~/.aws/credentials` or as an environment variables: 
-`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
+`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`
+
+### Develop
+```sh
+go mod init
+go get .
+git install
+./s3tree xxx
+```
 
 ### License
 MIT
