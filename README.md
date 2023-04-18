@@ -20,9 +20,8 @@ Remember, your credentials should located at `~/.aws/credentials` or as an envir
 
 ### Develop
 ```sh
-go mod init
-go get .
-git install
+go get
+go build
 ./s3tree xxx
 ```
 
