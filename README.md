@@ -4,6 +4,10 @@ s3tree
 
 ### Installation:
 ```sh
+$ go install github.com/a8m/s3tree@latest
+```
+for golang version less than 1.8:
+```sh
 $ go get github.com/a8m/s3tree
 ```
 
